@@ -1,0 +1,33 @@
+version: '3'
+services:
+  db:
+    image: mariadb:bionic
+    ports:
+      - "13306:3306"
+    environment:
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: wordpress
+      MYSQL_ROOT_PASSWORD: secret
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./wordpress:/var/www/html
+      - ./docker/nginx/site.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - wordpress
+  wordpress:
+    build:
+      context: ./docker/app
+    environment:
+      DB_NAME: wordpress
+      DB_USER: wp_user
+      DB_PASSWORD: secret
+      DB_HOST: db
+      DB_TABLE_PREFIX: wp
+      DEBUG: "true"
+    volumes:
+      - ./wordpress:/var/www/html
+      - ./docker/app/wordpress.conf:/usr/local/etc/php-fpm.d/www.conf
